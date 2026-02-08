@@ -17,6 +17,27 @@ Health Check Service is a robust monitoring solution designed to track the avail
 - Docker & Docker Compose
 - WAHA instance (for WhatsApp notifications)
 
+### 📥 Installation
+
+1.  **Clone the repository**:
+
+    ```bash
+    git clone https://github.com/RhmnDev14/health-check-service.git
+    cd health-check-service
+    ```
+
+2.  **Install Dependencies**:
+
+    ```bash
+    go mod download
+    ```
+
+3.  **Setup Configuration**:
+    ```bash
+    cp .env.example .env
+    # Edit .env with your database credentials and API tokens
+    ```
+
 ### Run with Docker Compose
 
 ```bash
@@ -163,37 +184,31 @@ DISCORD_BOT_TOKEN=your_discord_bot_token
 
 ## 📁 Project Structure
 
-```
-
-```
-
+```bash
 healt-check-service/
-├── cmd/ # Command line entry points
-│ ├── main.go # Main application server
-│ ├── get_telegram_chat_id/ # Utility to retrieve Telegram Chat ID
-│ └── verify_notification/ # Utility to test notification channels
-├── config/ # Configuration loader (env vars)
-├── infrastructure/ # External service implementations
-│ ├── discord/ # Discord client
-│ ├── telegram/ # Telegram client
-│ └── waha/ # WhatsApp (WAHA) client
-├── internal/ # Private application code
-│ ├── api/ # HTTP Router and Server setup
-│ ├── domain/ # Domain entities and interfaces
-│ ├── handler/ # HTTP Controllers/Handlers
-│ ├── queue/ # Async task queue (Redis)
-│ ├── repository/ # Database persistence (MongoDB)
-│ ├── scheduler/ # Cron-like scheduler for health checks
-│ └── usecase/ # Business logic and application services
+├── cmd/                        # Command line entry points
+│   ├── main.go                 # Main application server
+│   ├── get_telegram_chat_id/   # Utility to retrieve Telegram Chat ID
+│   └── verify_notification/    # Utility to test notification channels
+├── config/                     # Configuration loader (env vars)
+├── infrastructure/             # External service implementations
+│   ├── discord/                # Discord client
+│   ├── telegram/               # Telegram client
+│   └── waha/                   # WhatsApp (WAHA) client
+├── internal/                   # Private application code
+│   ├── api/                    # HTTP Router and Server setup
+│   ├── domain/                 # Domain entities and interfaces
+│   ├── handler/                # HTTP Controllers/Handlers
+│   ├── queue/                  # Async task queue (Redis)
+│   ├── repository/             # Database persistence (MongoDB)
+│   ├── scheduler/              # Cron-like scheduler for health checks
+│   └── usecase/                # Business logic and application services
 ├── web/
-│ └── dashboard/ # Frontend Dashboard (HTML/JS/CSS)
-├── .env # Environment variables file
-├── .env.example # Example environment variables
-├── docker-compose.yml # Container orchestration config
-├── Dockerfile # Application container definition
-├── go.mod # Go module definitions
-└── README.md # Project documentation
-
-```
-
+│   └── dashboard/              # Frontend Dashboard (HTML/JS/CSS)
+├── .env                        # Environment variables file
+├── .env.example                # Example environment variables
+├── docker-compose.yml          # Container orchestration config
+├── Dockerfile                  # Application container definition
+├── go.mod                      # Go module definitions
+└── README.md                   # Project documentation
 ```
