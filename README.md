@@ -1,6 +1,13 @@
 # Health Check Notification System
 
-Sistem untuk memantau kesehatan service dan mengirimkan notifikasi ketika service DOWN.
+Health Check Service is a robust monitoring solution designed to track the availability of your HTTP services. It periodically checks the health of registered endpoints and sends real-time notifications when a service goes DOWN or recovers (UP).
+
+**Key Features:**
+
+- **Multi-Channel Notifications**: Support for WhatsApp (via WAHA), Telegram, and Discord.
+- **Real-time Dashboard**: Web interface to view service status, logs, and manage configuration.
+- **Flexible Scheduling**: Customizable check intervals and retry logic.
+- **Persistent Logging**: Detailed history of health checks stored in MongoDB.
 
 ## 🚀 Quick Start
 
@@ -157,20 +164,36 @@ DISCORD_BOT_TOKEN=your_discord_bot_token
 ## 📁 Project Structure
 
 ```
+
+```
+
 healt-check-service/
-├── cmd/main.go                 # Entry point
-├── config/                     # Configuration
-├── api/                        # REST API handlers
-├── internal/
-│   ├── domain/                 # Domain models
-│   ├── repository/             # Data access
-│   ├── usecase/                # Business logic
-│   ├── queue/                  # AsyncQ
-│   └── scheduler/              # Health check scheduler
-├── infrastructure/waha/        # WAHA client
-├── infrastructure/telegram/    # Telegram client
-├── infrastructure/discord/     # Discord client
-├── web/dashboard/              # Dashboard UI
-├── docker-compose.yml
-└── Dockerfile
+├── cmd/ # Command line entry points
+│ ├── main.go # Main application server
+│ ├── get_telegram_chat_id/ # Utility to retrieve Telegram Chat ID
+│ └── verify_notification/ # Utility to test notification channels
+├── config/ # Configuration loader (env vars)
+├── infrastructure/ # External service implementations
+│ ├── discord/ # Discord client
+│ ├── telegram/ # Telegram client
+│ └── waha/ # WhatsApp (WAHA) client
+├── internal/ # Private application code
+│ ├── api/ # HTTP Router and Server setup
+│ ├── domain/ # Domain entities and interfaces
+│ ├── handler/ # HTTP Controllers/Handlers
+│ ├── queue/ # Async task queue (Redis)
+│ ├── repository/ # Database persistence (MongoDB)
+│ ├── scheduler/ # Cron-like scheduler for health checks
+│ └── usecase/ # Business logic and application services
+├── web/
+│ └── dashboard/ # Frontend Dashboard (HTML/JS/CSS)
+├── .env # Environment variables file
+├── .env.example # Example environment variables
+├── docker-compose.yml # Container orchestration config
+├── Dockerfile # Application container definition
+├── go.mod # Go module definitions
+└── README.md # Project documentation
+
+```
+
 ```
