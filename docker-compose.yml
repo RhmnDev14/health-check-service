@@ -1,0 +1,47 @@
+version: "3.8"
+
+services:
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - MONGO_URI=mongodb://mongo:27017
+      - MONGO_DATABASE=health_check_db
+      - REDIS_ADDR=redis:6379
+      - REDIS_PASSWORD=
+      - WAHA_API_URL=http://host.docker.internal:3000
+      - WAHA_SESSION=default
+      - WAHA_API_KEY=${WAHA_API_KEY:-9ce200e7e7b14b6d8f4d9d2052c58231}
+      - DEFAULT_CHECK_INTERVAL=60
+      - DEFAULT_RETRY_INTERVAL=180
+      - HTTP_TIMEOUT=10
+      - APP_ENV=production
+      - LOG_LEVEL=info
+      - APP_PORT=8080
+    depends_on:
+      - mongo
+      - redis
+    restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  mongo:
+    image: mongo:6
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+
+volumes:
+  mongo_data:
+  redis_data:

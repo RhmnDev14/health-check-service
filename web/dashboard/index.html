@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Health Check Dashboard</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>🏥 Health Check Dashboard</h1>
+        <p class="subtitle">Service Monitoring System</p>
+      </header>
+
+      <!-- Stats Cards -->
+      <div class="stats-container">
+        <div class="stat-card total">
+          <div class="stat-value" id="totalServices">0</div>
+          <div class="stat-label">Total Services</div>
+        </div>
+        <div class="stat-card up">
+          <div class="stat-value" id="upCount">0</div>
+          <div class="stat-label">Services UP</div>
+        </div>
+        <div class="stat-card down">
+          <div class="stat-value" id="downCount">0</div>
+          <div class="stat-label">Services DOWN</div>
+        </div>
+      </div>
+
+      <!-- Services Section -->
+      <section class="section">
+        <div class="section-header">
+          <h2>📡 Services</h2>
+          <button class="btn btn-primary" onclick="showAddServiceModal()">
+            + Add Service
+          </button>
+        </div>
+        <div class="services-grid" id="servicesGrid">
+          <!-- Services will be rendered here -->
+        </div>
+      </section>
+
+      <!-- Recipients Section -->
+      <section class="section">
+        <div class="section-header">
+          <h2>📱 Notification Recipients</h2>
+          <button class="btn btn-primary" onclick="showAddRecipientModal()">
+            + Add Recipient
+          </button>
+        </div>
+        <div class="recipients-list" id="recipientsList">
+          <!-- Recipients will be rendered here -->
+        </div>
+      </section>
+
+      <!-- Recent Logs Section -->
+      <section class="section">
+        <div class="section-header">
+          <h2>📋 Recent Health Checks</h2>
+          <button class="btn btn-secondary" onclick="loadRecentLogs()">
+            🔄 Refresh
+          </button>
+        </div>
+        <div class="logs-table-container">
+          <table class="logs-table">
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>Service</th>
+                <th>Status</th>
+                <th>Response Time</th>
+                <th>Error</th>
+              </tr>
+            </thead>
+            <tbody id="logsTableBody">
+              <!-- Logs will be rendered here -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+
+    <!-- Add Service Modal -->
+    <div class="modal" id="addServiceModal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Add New Service</h3>
+          <button class="close-btn" onclick="closeModal('addServiceModal')">
+            &times;
+          </button>
+        </div>
+        <form id="addServiceForm" onsubmit="addService(event)">
+          <div class="form-group">
+            <label for="serviceId">Service ID</label>
+            <input
+              type="text"
+              id="serviceId"
+              name="id"
+              required
+              placeholder="e.g., svc-payment"
+            />
+          </div>
+          <div class="form-group">
+            <label for="serviceName">Service Name</label>
+            <input
+              type="text"
+              id="serviceName"
+              name="name"
+              required
+              placeholder="e.g., Payment Service"
+            />
+          </div>
+          <div class="form-group">
+            <label for="serviceUrl">Health Check URL</label>
+            <input
+              type="url"
+              id="serviceUrl"
+              name="url"
+              required
+              placeholder="https://example.com/health"
+            />
+          </div>
+          <div class="form-group">
+            <label for="checkInterval">Check Interval (seconds)</label>
+            <input
+              type="number"
+              id="checkInterval"
+              name="check_interval"
+              value="60"
+              min="10"
+            />
+          </div>
+          <div class="form-group">
+            <label for="retryInterval"
+              >Retry Notification Interval (seconds)</label
+            >
+            <input
+              type="number"
+              id="retryInterval"
+              name="retry_interval"
+              value="180"
+              min="60"
+            />
+          </div>
+          <button type="submit" class="btn btn-primary btn-block">
+            Add Service
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Add Recipient Modal -->
+    <div class="modal" id="addRecipientModal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Add Notification Recipient</h3>
+          <button class="close-btn" onclick="closeModal('addRecipientModal')">
+            &times;
+          </button>
+        </div>
+        <form id="addRecipientForm" onsubmit="addRecipient(event)">
+          <div class="form-group">
+            <label for="recipientName">Name</label>
+            <input
+              type="text"
+              id="recipientName"
+              name="name"
+              required
+              placeholder="e.g., John Doe"
+            />
+          </div>
+          <div class="form-group">
+            <label for="recipientPhone">Phone Number</label>
+            <input
+              type="text"
+              id="recipientPhone"
+              name="phone"
+              required
+              placeholder="e.g., 6281234567890"
+            />
+          </div>
+          <button type="submit" class="btn btn-primary btn-block">
+            Add Recipient
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
