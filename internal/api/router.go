@@ -7,6 +7,10 @@ import (
 	"health-check-service/internal/scheduler"
 
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
+
+	_ "health-check-service/docs"
 )
 
 // Router represents the API router
@@ -75,6 +79,9 @@ func (r *Router) Setup(
 
 		// Dashboard
 		api.GET("/dashboard/stats", healthHandler.GetDashboardStats)
+
+		// Swagger
+		r.engine.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	}
 
 	// Serve static files for dashboard

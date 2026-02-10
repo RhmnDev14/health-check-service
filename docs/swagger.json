@@ -1,0 +1,608 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "This is a health check service server.",
+        "title": "Health Check Service API",
+        "contact": {},
+        "version": "1.0"
+    },
+    "host": "localhost:8080",
+    "basePath": "/api",
+    "paths": {
+        "/dashboard/stats": {
+            "get": {
+                "description": "Get dashboard statistics including service status counts and details",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "dashboard"
+                ],
+                "summary": "Get dashboard statistics",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/health-logs": {
+            "get": {
+                "description": "Get recent health check logs",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "health-logs"
+                ],
+                "summary": "Get recent health logs",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Limit number of logs",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/domain.HealthLog"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/health-logs/{serviceId}": {
+            "get": {
+                "description": "Get health check logs for a specific service",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "health-logs"
+                ],
+                "summary": "Get health logs by service ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Service ID",
+                        "name": "serviceId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Limit number of logs",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/domain.HealthLog"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/recipients": {
+            "get": {
+                "description": "Get all notification recipients",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "recipients"
+                ],
+                "summary": "Get all recipients",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/domain.Recipient"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a new notification recipient",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "recipients"
+                ],
+                "summary": "Create a new recipient",
+                "parameters": [
+                    {
+                        "description": "Recipient data",
+                        "name": "recipient",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/domain.CreateRecipientRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/domain.Recipient"
+                        }
+                    }
+                }
+            }
+        },
+        "/recipients/{id}": {
+            "get": {
+                "description": "Get a notification recipient by ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "recipients"
+                ],
+                "summary": "Get recipient by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Recipient ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/domain.Recipient"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update an existing notification recipient",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "recipients"
+                ],
+                "summary": "Update a recipient",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Recipient ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Recipient data",
+                        "name": "recipient",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/domain.UpdateRecipientRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete a notification recipient",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "recipients"
+                ],
+                "summary": "Delete a recipient",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Recipient ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/services": {
+            "get": {
+                "description": "Get all monitored services",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "services"
+                ],
+                "summary": "Get all services",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/domain.Service"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a new monitored service",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "services"
+                ],
+                "summary": "Create a new service",
+                "parameters": [
+                    {
+                        "description": "Service data",
+                        "name": "service",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/domain.CreateServiceRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/domain.Service"
+                        }
+                    }
+                }
+            }
+        },
+        "/services/{id}": {
+            "get": {
+                "description": "Get a service by its ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "services"
+                ],
+                "summary": "Get service by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Service ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/domain.Service"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update an existing service",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "services"
+                ],
+                "summary": "Update a service",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Service ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Service data",
+                        "name": "service",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/domain.UpdateServiceRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete a monitored service",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "services"
+                ],
+                "summary": "Delete a service",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Service ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "domain.CreateRecipientRequest": {
+            "type": "object",
+            "required": [
+                "channel",
+                "name"
+            ],
+            "properties": {
+                "channel": {
+                    "type": "string",
+                    "enum": [
+                        "whatsapp",
+                        "telegram",
+                        "discord"
+                    ]
+                },
+                "discord_id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "string"
+                },
+                "telegram_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "domain.CreateServiceRequest": {
+            "type": "object",
+            "required": [
+                "id",
+                "name",
+                "url"
+            ],
+            "properties": {
+                "check_interval": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "retry_interval": {
+                    "type": "integer"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
+        "domain.HealthLog": {
+            "type": "object",
+            "properties": {
+                "checked_at": {
+                    "type": "string"
+                },
+                "error_message": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "notification_sent": {
+                    "type": "boolean"
+                },
+                "response_time_ms": {
+                    "type": "integer"
+                },
+                "service_id": {
+                    "type": "string"
+                },
+                "service_name": {
+                    "type": "string"
+                },
+                "status": {
+                    "description": "UP, DOWN",
+                    "type": "string"
+                }
+            }
+        },
+        "domain.Recipient": {
+            "type": "object",
+            "properties": {
+                "channel": {
+                    "description": "whatsapp, telegram, email",
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "discord_id": {
+                    "description": "Discord channel/user ID",
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "is_active": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "phone": {
+                    "description": "WhatsApp",
+                    "type": "string"
+                },
+                "telegram_id": {
+                    "description": "Telegram chat ID",
+                    "type": "string"
+                }
+            }
+        },
+        "domain.Service": {
+            "type": "object",
+            "properties": {
+                "check_interval": {
+                    "description": "seconds",
+                    "type": "integer"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "is_active": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "retry_interval": {
+                    "description": "seconds for notification retry",
+                    "type": "integer"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
+        "domain.UpdateRecipientRequest": {
+            "type": "object",
+            "properties": {
+                "channel": {
+                    "type": "string"
+                },
+                "discord_id": {
+                    "type": "string"
+                },
+                "is_active": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "string"
+                },
+                "telegram_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "domain.UpdateServiceRequest": {
+            "type": "object",
+            "properties": {
+                "check_interval": {
+                    "type": "integer"
+                },
+                "is_active": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "retry_interval": {
+                    "type": "integer"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}

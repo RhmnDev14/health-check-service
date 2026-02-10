@@ -1,5 +1,11 @@
 package main
 
+// @title Health Check Service API
+// @version 1.0
+// @description This is a health check service server.
+// @host localhost:8080
+// @BasePath /api
+
 import (
 	"context"
 	"os"

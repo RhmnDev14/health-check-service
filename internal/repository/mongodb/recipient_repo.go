@@ -6,6 +6,7 @@ import (
 
 	"health-check-service/internal/domain"
 
+	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -30,6 +31,7 @@ func (r *RecipientRepository) Create(ctx context.Context, recipient *domain.Reci
 	recipient.CreatedAt = time.Now()
 	recipient.IsActive = true
 
+	logrus.Info("Recipient created: ", recipient)
 	_, err := r.collection.InsertOne(ctx, recipient)
 	return err
 }

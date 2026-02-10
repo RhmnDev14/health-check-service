@@ -29,6 +29,7 @@ COPY --from=builder /app/main .
 
 # Copy web assets
 COPY --from=builder /app/web ./web
+COPY --from=builder /app/docs ./docs
 
 # Expose port
 EXPOSE 8080

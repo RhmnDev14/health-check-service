@@ -34,7 +34,7 @@ func EnqueueNotification(payload NotificationPayload) error {
 	}
 
 	info, err := Client.Enqueue(task,
-		asynq.MaxRetry(3),
+		asynq.MaxRetry(1),
 		asynq.Queue("notifications"),
 	)
 	if err != nil {

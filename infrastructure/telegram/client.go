@@ -1,21 +1,19 @@
 package telegram
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
-	"net/http"
 	"time"
 
 	"health-check-service/config"
 
+	"github.com/go-resty/resty/v2"
 	"github.com/sirupsen/logrus"
 )
 
 // Client represents the Telegram Bot API client
 type Client struct {
-	botToken   string
-	httpClient *http.Client
+	botToken string
+	client   *resty.Client
 }
 
 // SendMessageRequest represents the request to send a message
@@ -27,11 +25,13 @@ type SendMessageRequest struct {
 
 // NewClient creates a new Telegram client
 func NewClient(cfg *config.Config) *Client {
+	client := resty.New().
+		SetTimeout(30*time.Second).
+		SetHeader("Content-Type", "application/json")
+
 	return &Client{
 		botToken: cfg.TelegramBotToken,
-		httpClient: &http.Client{
-			Timeout: 30 * time.Second,
-		},
+		client:   client,
 	}
 }
 
@@ -52,27 +52,21 @@ func (c *Client) SendMessage(chatID, message string) error {
 		ParseMode: "Markdown",
 	}
 
-	jsonData, err := json.Marshal(payload)
-	if err != nil {
-		return fmt.Errorf("failed to marshal payload: %w", err)
-	}
-
 	url := fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage", c.botToken)
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+
+	logrus.Info("Sending message to Telegram chat", chatID)
+	logrus.Info("Payload: ", payload)
+	resp, err := c.client.R().
+		SetBody(payload).
+		Post(url)
+
 	if err != nil {
-		return fmt.Errorf("failed to create request: %w", err)
+		return err
 	}
 
-	req.Header.Set("Content-Type", "application/json")
-
-	resp, err := c.httpClient.Do(req)
-	if err != nil {
-		return fmt.Errorf("failed to send request: %w", err)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode >= 400 {
-		return fmt.Errorf("telegram API error: status code %d", resp.StatusCode)
+	if resp.IsError() {
+		logrus.Errorf("Telegram API error: %s", resp.String())
+		return fmt.Errorf("telegram API error: %s", resp.Status())
 	}
 
 	logrus.Infof("Message sent to Telegram chat %s", chatID)

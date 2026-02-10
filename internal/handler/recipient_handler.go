@@ -8,6 +8,7 @@ import (
 	"health-check-service/internal/repository/mongodb"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -22,6 +23,12 @@ func NewRecipientHandler(repo *mongodb.RecipientRepository) *RecipientHandler {
 }
 
 // GetAll returns all recipients
+// @Summary Get all recipients
+// @Description Get all notification recipients
+// @Tags recipients
+// @Produce json
+// @Success 200 {array} domain.Recipient
+// @Router /recipients [get]
 func (h *RecipientHandler) GetAll(c *gin.Context) {
 	recipients, err := h.repo.GetAll(c.Request.Context())
 	if err != nil {
@@ -32,6 +39,13 @@ func (h *RecipientHandler) GetAll(c *gin.Context) {
 }
 
 // GetByID returns a recipient by ID
+// @Summary Get recipient by ID
+// @Description Get a notification recipient by ID
+// @Tags recipients
+// @Produce json
+// @Param id path string true "Recipient ID"
+// @Success 200 {object} domain.Recipient
+// @Router /recipients/{id} [get]
 func (h *RecipientHandler) GetByID(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := primitive.ObjectIDFromHex(idStr)
@@ -49,6 +63,14 @@ func (h *RecipientHandler) GetByID(c *gin.Context) {
 }
 
 // Create creates a new recipient
+// @Summary Create a new recipient
+// @Description Create a new notification recipient
+// @Tags recipients
+// @Accept json
+// @Produce json
+// @Param recipient body domain.CreateRecipientRequest true "Recipient data"
+// @Success 201 {object} domain.Recipient
+// @Router /recipients [post]
 func (h *RecipientHandler) Create(c *gin.Context) {
 	var req domain.CreateRecipientRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -57,11 +79,16 @@ func (h *RecipientHandler) Create(c *gin.Context) {
 	}
 
 	recipient := &domain.Recipient{
-		Name:      req.Name,
-		Phone:     req.Phone,
-		IsActive:  true,
-		CreatedAt: time.Now(),
+		Name:       req.Name,
+		Phone:      req.Phone,
+		Channel:    req.Channel,
+		TelegramID: req.TelegramID,
+		DiscordID:  req.DiscordID,
+		IsActive:   true,
+		CreatedAt:  time.Now(),
 	}
+
+	logrus.Info("Recipient created: ", recipient)
 
 	if err := h.repo.Create(c.Request.Context(), recipient); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -72,6 +99,15 @@ func (h *RecipientHandler) Create(c *gin.Context) {
 }
 
 // Update updates a recipient
+// @Summary Update a recipient
+// @Description Update an existing notification recipient
+// @Tags recipients
+// @Accept json
+// @Produce json
+// @Param id path string true "Recipient ID"
+// @Param recipient body domain.UpdateRecipientRequest true "Recipient data"
+// @Success 200 {object} map[string]string
+// @Router /recipients/{id} [put]
 func (h *RecipientHandler) Update(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := primitive.ObjectIDFromHex(idStr)
@@ -95,6 +131,13 @@ func (h *RecipientHandler) Update(c *gin.Context) {
 }
 
 // Delete deletes a recipient
+// @Summary Delete a recipient
+// @Description Delete a notification recipient
+// @Tags recipients
+// @Produce json
+// @Param id path string true "Recipient ID"
+// @Success 200 {object} map[string]string
+// @Router /recipients/{id} [delete]
 func (h *RecipientHandler) Delete(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := primitive.ObjectIDFromHex(idStr)

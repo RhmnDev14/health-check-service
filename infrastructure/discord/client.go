@@ -1,21 +1,19 @@
 package discord
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
-	"net/http"
 	"time"
 
 	"health-check-service/config"
 
+	"github.com/go-resty/resty/v2"
 	"github.com/sirupsen/logrus"
 )
 
 // Client represents the Discord API client
 type Client struct {
-	botToken   string
-	httpClient *http.Client
+	botToken string
+	client   *resty.Client
 }
 
 // SendMessageRequest represents the request to send a message
@@ -25,11 +23,18 @@ type SendMessageRequest struct {
 
 // NewClient creates a new Discord client
 func NewClient(cfg *config.Config) *Client {
+	client := resty.New().
+		SetBaseURL("https://discord.com/api/v10").
+		SetTimeout(30*time.Second).
+		SetHeader("Content-Type", "application/json")
+
+	if cfg.DiscordBotToken != "" {
+		client.SetHeader("Authorization", fmt.Sprintf("Bot %s", cfg.DiscordBotToken))
+	}
+
 	return &Client{
 		botToken: cfg.DiscordBotToken,
-		httpClient: &http.Client{
-			Timeout: 30 * time.Second,
-		},
+		client:   client,
 	}
 }
 
@@ -48,28 +53,17 @@ func (c *Client) SendMessage(channelID, message string) error {
 		Content: message,
 	}
 
-	jsonData, err := json.Marshal(payload)
+	resp, err := c.client.R().
+		SetBody(payload).
+		Post(fmt.Sprintf("/channels/%s/messages", channelID))
+
 	if err != nil {
-		return fmt.Errorf("failed to marshal payload: %w", err)
+		return err
 	}
 
-	url := fmt.Sprintf("https://discord.com/api/v10/channels/%s/messages", channelID)
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
-	if err != nil {
-		return fmt.Errorf("failed to create request: %w", err)
-	}
-
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", fmt.Sprintf("Bot %s", c.botToken))
-
-	resp, err := c.httpClient.Do(req)
-	if err != nil {
-		return fmt.Errorf("failed to send request: %w", err)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode >= 400 {
-		return fmt.Errorf("discord API error: status code %d", resp.StatusCode)
+	if resp.IsError() {
+		logrus.Errorf("Discord API error: %s", resp.String())
+		return fmt.Errorf("discord API error: %s", resp.Status())
 	}
 
 	logrus.Infof("Message sent to Discord channel %s", channelID)

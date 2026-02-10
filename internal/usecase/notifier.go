@@ -45,6 +45,7 @@ func NewNotifier(
 // SendNotification sends notification to all active recipients
 // Implements queue.NotificationSender interface
 func (n *Notifier) SendNotification(ctx context.Context, payload queue.NotificationPayload) error {
+	logrus.Infof("Processing notification for service: %s (status: %s)", payload.ServiceName, payload.Status)
 	// Get all active recipients
 	recipients, err := n.recipientRepo.GetActive(ctx)
 	if err != nil {
@@ -60,16 +61,20 @@ func (n *Notifier) SendNotification(ctx context.Context, payload queue.Notificat
 	message := n.buildMessage(payload)
 
 	// Send to all recipients
+	logrus.Infof("Sending notification to %d recipients", len(recipients))
+	logrus.Infof("Message: %s", message)
 	var lastErr error
 	successCount := 0
 	for _, recipient := range recipients {
+		logrus.Infof("Sending notification to recipient: %s", recipient.Name)
+		logrus.Infof("Recipient channel: %s", recipient.Channel)
 		var err error
-		switch recipient.Channel {
-		case domain.ChannelWhatsApp:
+		switch {
+		case recipient.Channel == domain.ChannelWhatsApp:
 			err = n.wahaClient.SendText(recipient.Phone, message)
-		case domain.ChannelTelegram:
+		case recipient.Channel == domain.ChannelTelegram:
 			err = n.telegramClient.SendMessage(recipient.TelegramID, message)
-		case domain.ChannelDiscord:
+		case recipient.Channel == domain.ChannelDiscord:
 			err = n.discordClient.SendMessage(recipient.DiscordID, message)
 		default:
 			logrus.Warnf("Unknown channel %s for recipient %s", recipient.Channel, recipient.Name)

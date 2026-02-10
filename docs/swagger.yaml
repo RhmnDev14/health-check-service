@@ -1,0 +1,404 @@
+basePath: /api
+definitions:
+  domain.CreateRecipientRequest:
+    properties:
+      channel:
+        enum:
+        - whatsapp
+        - telegram
+        - discord
+        type: string
+      discord_id:
+        type: string
+      name:
+        type: string
+      phone:
+        type: string
+      telegram_id:
+        type: string
+    required:
+    - channel
+    - name
+    type: object
+  domain.CreateServiceRequest:
+    properties:
+      check_interval:
+        type: integer
+      id:
+        type: string
+      name:
+        type: string
+      retry_interval:
+        type: integer
+      url:
+        type: string
+    required:
+    - id
+    - name
+    - url
+    type: object
+  domain.HealthLog:
+    properties:
+      checked_at:
+        type: string
+      error_message:
+        type: string
+      id:
+        type: string
+      notification_sent:
+        type: boolean
+      response_time_ms:
+        type: integer
+      service_id:
+        type: string
+      service_name:
+        type: string
+      status:
+        description: UP, DOWN
+        type: string
+    type: object
+  domain.Recipient:
+    properties:
+      channel:
+        description: whatsapp, telegram, email
+        type: string
+      created_at:
+        type: string
+      discord_id:
+        description: Discord channel/user ID
+        type: string
+      id:
+        type: string
+      is_active:
+        type: boolean
+      name:
+        type: string
+      phone:
+        description: WhatsApp
+        type: string
+      telegram_id:
+        description: Telegram chat ID
+        type: string
+    type: object
+  domain.Service:
+    properties:
+      check_interval:
+        description: seconds
+        type: integer
+      created_at:
+        type: string
+      id:
+        type: string
+      is_active:
+        type: boolean
+      name:
+        type: string
+      retry_interval:
+        description: seconds for notification retry
+        type: integer
+      updated_at:
+        type: string
+      url:
+        type: string
+    type: object
+  domain.UpdateRecipientRequest:
+    properties:
+      channel:
+        type: string
+      discord_id:
+        type: string
+      is_active:
+        type: boolean
+      name:
+        type: string
+      phone:
+        type: string
+      telegram_id:
+        type: string
+    type: object
+  domain.UpdateServiceRequest:
+    properties:
+      check_interval:
+        type: integer
+      is_active:
+        type: boolean
+      name:
+        type: string
+      retry_interval:
+        type: integer
+      url:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: This is a health check service server.
+  title: Health Check Service API
+  version: "1.0"
+paths:
+  /dashboard/stats:
+    get:
+      description: Get dashboard statistics including service status counts and details
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get dashboard statistics
+      tags:
+      - dashboard
+  /health-logs:
+    get:
+      description: Get recent health check logs
+      parameters:
+      - description: Limit number of logs
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.HealthLog'
+            type: array
+      summary: Get recent health logs
+      tags:
+      - health-logs
+  /health-logs/{serviceId}:
+    get:
+      description: Get health check logs for a specific service
+      parameters:
+      - description: Service ID
+        in: path
+        name: serviceId
+        required: true
+        type: string
+      - description: Limit number of logs
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.HealthLog'
+            type: array
+      summary: Get health logs by service ID
+      tags:
+      - health-logs
+  /recipients:
+    get:
+      description: Get all notification recipients
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.Recipient'
+            type: array
+      summary: Get all recipients
+      tags:
+      - recipients
+    post:
+      consumes:
+      - application/json
+      description: Create a new notification recipient
+      parameters:
+      - description: Recipient data
+        in: body
+        name: recipient
+        required: true
+        schema:
+          $ref: '#/definitions/domain.CreateRecipientRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/domain.Recipient'
+      summary: Create a new recipient
+      tags:
+      - recipients
+  /recipients/{id}:
+    delete:
+      description: Delete a notification recipient
+      parameters:
+      - description: Recipient ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete a recipient
+      tags:
+      - recipients
+    get:
+      description: Get a notification recipient by ID
+      parameters:
+      - description: Recipient ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Recipient'
+      summary: Get recipient by ID
+      tags:
+      - recipients
+    put:
+      consumes:
+      - application/json
+      description: Update an existing notification recipient
+      parameters:
+      - description: Recipient ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Recipient data
+        in: body
+        name: recipient
+        required: true
+        schema:
+          $ref: '#/definitions/domain.UpdateRecipientRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update a recipient
+      tags:
+      - recipients
+  /services:
+    get:
+      description: Get all monitored services
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.Service'
+            type: array
+      summary: Get all services
+      tags:
+      - services
+    post:
+      consumes:
+      - application/json
+      description: Create a new monitored service
+      parameters:
+      - description: Service data
+        in: body
+        name: service
+        required: true
+        schema:
+          $ref: '#/definitions/domain.CreateServiceRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/domain.Service'
+      summary: Create a new service
+      tags:
+      - services
+  /services/{id}:
+    delete:
+      description: Delete a monitored service
+      parameters:
+      - description: Service ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete a service
+      tags:
+      - services
+    get:
+      description: Get a service by its ID
+      parameters:
+      - description: Service ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Service'
+      summary: Get service by ID
+      tags:
+      - services
+    put:
+      consumes:
+      - application/json
+      description: Update an existing service
+      parameters:
+      - description: Service ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Service data
+        in: body
+        name: service
+        required: true
+        schema:
+          $ref: '#/definitions/domain.UpdateServiceRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update a service
+      tags:
+      - services
+swagger: "2.0"

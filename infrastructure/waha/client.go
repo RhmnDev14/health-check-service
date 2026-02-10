@@ -1,23 +1,21 @@
 package waha
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
-	"net/http"
 	"time"
 
 	"health-check-service/config"
 
+	"github.com/go-resty/resty/v2"
 	"github.com/sirupsen/logrus"
 )
 
 // Client represents the WAHA API client
 type Client struct {
-	baseURL    string
-	session    string
-	apiKey     string
-	httpClient *http.Client
+	baseURL string
+	session string
+	apiKey  string
+	client  *resty.Client
 }
 
 // SendTextRequest represents the request to send text message
@@ -28,19 +26,34 @@ type SendTextRequest struct {
 
 // NewClient creates a new WAHA client
 func NewClient(cfg *config.Config) *Client {
+	client := resty.New().
+		SetBaseURL(cfg.WahaAPIURL).
+		SetTimeout(30*time.Second).
+		SetHeader("Content-Type", "application/json")
+
+	if cfg.WahaAPIKey != "" {
+		client.SetHeader("X-Api-Key", cfg.WahaAPIKey)
+	}
+
+	logrus.Infof("WAHA client initialized")
+	logrus.Infof("WAHA API URL: %s", cfg.WahaAPIURL)
+	logrus.Infof("WAHA API Key: %s", cfg.WahaAPIKey)
+	logrus.Infof("WAHA Session: %s", cfg.WahaSession)
+
 	return &Client{
 		baseURL: cfg.WahaAPIURL,
 		session: cfg.WahaSession,
 		apiKey:  cfg.WahaAPIKey,
-		httpClient: &http.Client{
-			Timeout: 30 * time.Second,
-		},
+		client:  client,
 	}
 }
 
-// SendText sends a text message to the specified phone number
+// SendText sends a text message
 func (c *Client) SendText(phone, message string) error {
-	// Format chatId for WhatsApp
+	if c.session != "" {
+		return c.SendTextWithSession(c.session, phone, message)
+	}
+
 	chatID := fmt.Sprintf("%s@c.us", phone)
 
 	payload := SendTextRequest{
@@ -48,30 +61,20 @@ func (c *Client) SendText(phone, message string) error {
 		Text:   message,
 	}
 
-	jsonData, err := json.Marshal(payload)
+	logrus.Infof("Sending message to %s via WAHA", phone)
+
+	resp, err := c.client.R().
+		SetBody(payload).
+		Post("/api/sendText")
+
 	if err != nil {
-		return fmt.Errorf("failed to marshal payload: %w", err)
+		logrus.Errorf("Failed to send request: %v", err)
+		return err
 	}
 
-	url := fmt.Sprintf("%s/api/sendText", c.baseURL)
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
-	if err != nil {
-		return fmt.Errorf("failed to create request: %w", err)
-	}
-
-	req.Header.Set("Content-Type", "application/json")
-	if c.apiKey != "" {
-		req.Header.Set("X-Api-Key", c.apiKey)
-	}
-
-	resp, err := c.httpClient.Do(req)
-	if err != nil {
-		return fmt.Errorf("failed to send request: %w", err)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode >= 400 {
-		return fmt.Errorf("WAHA API error: status code %d", resp.StatusCode)
+	if resp.IsError() {
+		logrus.Errorf("WAHA API error: %s", resp.String())
+		return fmt.Errorf("WAHA API error: %s", resp.Status())
 	}
 
 	logrus.Infof("Message sent to %s via WAHA", phone)
@@ -87,30 +90,18 @@ func (c *Client) SendTextWithSession(session, phone, message string) error {
 		Text:   message,
 	}
 
-	jsonData, err := json.Marshal(payload)
+	logrus.Infof("Sending message to %s via WAHA session %s", phone, session)
+
+	resp, err := c.client.R().
+		SetBody(payload).
+		Post(fmt.Sprintf("/api/sessions/%s/sendText", session))
+
 	if err != nil {
-		return fmt.Errorf("failed to marshal payload: %w", err)
+		return err
 	}
 
-	url := fmt.Sprintf("%s/api/sessions/%s/sendText", c.baseURL, session)
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
-	if err != nil {
-		return fmt.Errorf("failed to create request: %w", err)
-	}
-
-	req.Header.Set("Content-Type", "application/json")
-	if c.apiKey != "" {
-		req.Header.Set("X-Api-Key", c.apiKey)
-	}
-
-	resp, err := c.httpClient.Do(req)
-	if err != nil {
-		return fmt.Errorf("failed to send request: %w", err)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode >= 400 {
-		return fmt.Errorf("WAHA API error: status code %d", resp.StatusCode)
+	if resp.IsError() {
+		return fmt.Errorf("WAHA API error: %s", resp.Status())
 	}
 
 	logrus.Infof("Message sent to %s via WAHA session %s", phone, session)

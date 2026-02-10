@@ -22,6 +22,13 @@ func NewHealthHandler(healthLogRepo *mongodb.HealthLogRepository, serviceRepo *m
 }
 
 // GetRecentLogs returns recent health check logs
+// @Summary Get recent health logs
+// @Description Get recent health check logs
+// @Tags health-logs
+// @Produce json
+// @Param limit query int false "Limit number of logs"
+// @Success 200 {array} domain.HealthLog
+// @Router /health-logs [get]
 func (h *HealthHandler) GetRecentLogs(c *gin.Context) {
 	limitStr := c.DefaultQuery("limit", "50")
 	limit, err := strconv.ParseInt(limitStr, 10, 64)
@@ -38,6 +45,14 @@ func (h *HealthHandler) GetRecentLogs(c *gin.Context) {
 }
 
 // GetLogsByServiceID returns logs for a specific service
+// @Summary Get health logs by service ID
+// @Description Get health check logs for a specific service
+// @Tags health-logs
+// @Produce json
+// @Param serviceId path string true "Service ID"
+// @Param limit query int false "Limit number of logs"
+// @Success 200 {array} domain.HealthLog
+// @Router /health-logs/{serviceId} [get]
 func (h *HealthHandler) GetLogsByServiceID(c *gin.Context) {
 	serviceID := c.Param("serviceId")
 	limitStr := c.DefaultQuery("limit", "50")
@@ -55,6 +70,12 @@ func (h *HealthHandler) GetLogsByServiceID(c *gin.Context) {
 }
 
 // GetDashboardStats returns dashboard statistics
+// @Summary Get dashboard statistics
+// @Description Get dashboard statistics including service status counts and details
+// @Tags dashboard
+// @Produce json
+// @Success 200 {object} map[string]interface{}
+// @Router /dashboard/stats [get]
 func (h *HealthHandler) GetDashboardStats(c *gin.Context) {
 	ctx := c.Request.Context()
 

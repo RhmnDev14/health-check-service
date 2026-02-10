@@ -1,0 +1,15 @@
+.git
+.vscode
+.idea
+vendor
+node_modules
+dist
+bin
+tmp
+.env
+.env.example
+docker-compose.yml
+README.md
+LICENSE
+.DS_Store
+__debug_bin

@@ -27,6 +27,12 @@ func NewServiceHandler(repo *mongodb.ServiceRepository, scheduler *scheduler.Sch
 }
 
 // GetAll returns all services
+// @Summary Get all services
+// @Description Get all monitored services
+// @Tags services
+// @Produce json
+// @Success 200 {array} domain.Service
+// @Router /services [get]
 func (h *ServiceHandler) GetAll(c *gin.Context) {
 	services, err := h.repo.GetAll(c.Request.Context())
 	if err != nil {
@@ -37,6 +43,13 @@ func (h *ServiceHandler) GetAll(c *gin.Context) {
 }
 
 // GetByID returns a service by ID
+// @Summary Get service by ID
+// @Description Get a service by its ID
+// @Tags services
+// @Produce json
+// @Param id path string true "Service ID"
+// @Success 200 {object} domain.Service
+// @Router /services/{id} [get]
 func (h *ServiceHandler) GetByID(c *gin.Context) {
 	id := c.Param("id")
 	service, err := h.repo.GetByID(c.Request.Context(), id)
@@ -48,6 +61,14 @@ func (h *ServiceHandler) GetByID(c *gin.Context) {
 }
 
 // Create creates a new service
+// @Summary Create a new service
+// @Description Create a new monitored service
+// @Tags services
+// @Accept json
+// @Produce json
+// @Param service body domain.CreateServiceRequest true "Service data"
+// @Success 201 {object} domain.Service
+// @Router /services [post]
 func (h *ServiceHandler) Create(c *gin.Context) {
 	var req domain.CreateServiceRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -86,6 +107,15 @@ func (h *ServiceHandler) Create(c *gin.Context) {
 }
 
 // Update updates a service
+// @Summary Update a service
+// @Description Update an existing service
+// @Tags services
+// @Accept json
+// @Produce json
+// @Param id path string true "Service ID"
+// @Param service body domain.UpdateServiceRequest true "Service data"
+// @Success 200 {object} map[string]string
+// @Router /services/{id} [put]
 func (h *ServiceHandler) Update(c *gin.Context) {
 	id := c.Param("id")
 
@@ -110,6 +140,13 @@ func (h *ServiceHandler) Update(c *gin.Context) {
 }
 
 // Delete deletes a service
+// @Summary Delete a service
+// @Description Delete a monitored service
+// @Tags services
+// @Produce json
+// @Param id path string true "Service ID"
+// @Success 200 {object} map[string]string
+// @Router /services/{id} [delete]
 func (h *ServiceHandler) Delete(c *gin.Context) {
 	id := c.Param("id")
 
